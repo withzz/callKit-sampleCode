@@ -4,7 +4,7 @@ import NIM from "@yxim/nim-web-sdk/dist/SDK/NIM_Web_NIM"
 import { NECall } from '@xkit-yx/call-kit'
 
 const neCall = NECall.getInstance()
-window.neCall = neCall;
+window.neCall = neCall
 const appkey = ref('')
 const accId = ref('')
 const token = ref('')
@@ -67,8 +67,8 @@ const login = () => {
 
 const call = async () => {
   // 发起呼叫
-  const localView = document.getElementById('NE_local')
-  const remoteView = document.getElementById('NE_remote')
+  const localView = document.getElementById('NE_small')
+  const remoteView = document.getElementById('NE_large')
   neCall.setLocalView(localView)
   neCall.setRemoteView(remoteView, callee.value)
   neCall.setTimeout(30)//设置呼叫超时取消时间，单位：秒
@@ -79,32 +79,29 @@ const call = async () => {
 }
 
 const switchView = () => {
-  neCall.rtcController.localStream.stop('video')
-  neCall.rtcController.remoteStreams[0].stop('video')
   if (switchViewFlag.value) {
-    const localView = document.getElementById('NE_local')
-    const remoteView = document.getElementById('NE_remote')
-    neCall.rtcController.localStream.play(remoteView)
-    neCall.rtcController.remoteStreams[0].play(localView)
-
+    const localView = document.getElementById('NE_small')
+    const remoteView = document.getElementById('NE_large')
     neCall.setLocalView(remoteView)
     neCall.setRemoteView(localView)
+    neCall.rtcController.playLocalStream()
+    neCall.rtcController.playRemoteStream(neCall.rtcController.remoteStreams[0])
     switchViewFlag.value = 0
   } else {
-    const localView = document.getElementById('NE_local')
-    const remoteView = document.getElementById('NE_remote')
-    neCall.rtcController.localStream.play(localView)
-    neCall.rtcController.remoteStreams[0].play(remoteView)
+    const localView = document.getElementById('NE_small')
+    const remoteView = document.getElementById('NE_large')
     neCall.setLocalView(localView)
     neCall.setRemoteView(remoteView)
+    neCall.rtcController.playLocalStream()
+    neCall.rtcController.playRemoteStream(neCall.rtcController.remoteStreams[0])
     switchViewFlag.value = 1
   }
 }
 
 const accept = () => {
   // 接受邀请
-  const localView = document.getElementById('NE_local')
-  const remoteView = document.getElementById('NE_remote')
+  const localView = document.getElementById('NE_small')
+  const remoteView = document.getElementById('NE_large')
   neCall.setLocalView(localView)
   neCall.setRemoteView(remoteView, callee.value)
   // 接受邀请，需要先设置视图
@@ -179,9 +176,45 @@ const enableLocalAudio = () => {
       callee:
       <input type="text" v-model="callee" />
     </div>
-    <div id="NE_local" style="width:320px; height:240px; background-color:red;">
-    </div>
-    <div id="NE_remote" style="width:320px; height:240px; background-color:green;">
+    <div id="NE_view">
+      <div id="NE_large">
+      </div>
+      <div id="NE_small" @click="switchView">
+      </div>
     </div>
   </div>
 </template>
+<style>
+#NE_view {
+  width: 375px;
+  height: 606px;
+  background: #1d1d23;
+  box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014,
+    0 9px 28px 8px #0000000d;
+  position: absolute;
+  z-index: 98;
+  top: 120px;
+  left: 50px;
+  overflow: hidden;
+}
+
+#NE_large {
+  background-color: #000;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+}
+
+#NE_small {
+  background-color: #000;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 125px;
+  height: 202px;
+  display: block;
+}
+</style>
